@@ -229,5 +229,9 @@ class DeletePhoneNumber(LoginRequiredMixin, DeleteView):
         self.qs_dict[self.request.GET.get("page", "1")] = qs.exclude(pk=kwargs['pk']).all()
         cache.set(f"{self.request.user.id}", self.qs_dict, 120)
 
+        # Add to session
+        deleted_phone_number_input = self.object.phone_number
+        add_to_session(self.request.session, "Deleted", f'{deleted_phone_number_input}')
+
         return delete_respone
 
