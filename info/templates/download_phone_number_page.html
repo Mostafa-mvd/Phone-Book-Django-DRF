@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+
+{% block content %}
+    <div style='margin-top: 100px; margin-right: 50px; margin-left: 50px;'>
+        <table class="table table-info table-striped table-hover text-center">
+            <tr>
+                <td colspan="3">{% trans "Added Phone Number" %}</td>
+            </tr>
+            <tr>
+                <th>{% trans "First Name" %}</th>
+                <th>{% trans "Last Name" %}</th>
+                <th>{% trans "Phone Number" %}</th>
+            </tr>
+            {% for row in object_list %}
+                <tr id="{{ row.pk }}">
+                    <td>{{ row.first_name }}</td>
+                    <td>{{ row.last_name }}</td>
+                    <td><p>{{ row.phone_number }}</p></td>
+                </tr>
+            {% endfor %}
+        </table>
+{% endblock content %}

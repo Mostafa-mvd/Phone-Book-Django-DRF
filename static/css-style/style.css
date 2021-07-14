@@ -1,0 +1,18 @@
+@font-face {
+    font-family: "Samin";
+    font-size: normal;
+    src: url("../fonts/samim/Samim.woff") format("woff"),
+         url("../fonts/samim/Samim-Bold.woff2") format("woff2");
+}
+
+body {
+    font-family: 'Samin', 'Safir';
+}
+
+a {
+    font-family: 'Samin', 'Safir';
+}
+
+th, td {
+    font-family: 'Samin', 'Safir';
+}

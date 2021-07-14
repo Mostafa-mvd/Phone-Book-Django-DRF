@@ -1,0 +1,29 @@
+version: "3.3"
+volumes:
+  PhoneBookDb:
+services:
+  db:
+    image: "postgres:13.3-alpine"
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=phonebook
+      - POSTGRES_USER=mostafa_vm
+      - POSTGRES_PASSWORD=12345678910
+      - PGDATA=/myphonebook_data
+    volumes:
+      - PhoneBookDb:/myphonebook_data
+  cache:
+    image: "memcached:alpine"
+    ports:
+      - 11211:11211
+  broker: # It is for celery
+    image: "rabbitmq:alpine"
+    hostname: "phone_note"
+    ports:
+      - 5672:5672
+  testmail:
+    image: "mailhog/mailhog"
+    ports:
+      - 1025:1025
+      - 8025:8025

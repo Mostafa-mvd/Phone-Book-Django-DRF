@@ -1,0 +1,70 @@
+{
+  "login_requirements": [
+    {
+      "username": "mostafa",
+      "password": "12345678910"
+    },
+    {
+      "username": "ali",
+      "password": "2020ali"
+    },
+    {
+      "username": "mostafa",
+      "password": "12345678910mvd"
+    }
+  ],
+  "incorrect_phone_numbers": [
+    {
+      "first_name": "mostafa",
+      "last_name": "hamidi",
+      "phone_number": "09384fgh25"
+    },
+    {
+      "first_name": "mostafa",
+      "last_name": "hamidi",
+      "phone_number": ""
+    },
+    {
+      "first_name": "mostafa",
+      "last_name": "hamidi",
+      "phone_number": "sdfsdf"
+    },
+    {
+      "first_name": "",
+      "last_name": "",
+      "phone_number": "09384485336"
+    },
+    {
+      "first_name": "mostafa",
+      "last_name": "hamidi",
+      "phone_number": "09384485325"
+    }
+  ],
+  "users_phone_numbers": [
+    {
+      "first_name": "mostafa",
+      "last_name": "hamidi",
+      "phone_number": "09384485325"
+    },
+    {
+      "first_name": "mostafa",
+      "last_name": "sadeghi",
+      "phone_number": "09374485325"
+    },
+    {
+      "first_name": "ali",
+      "last_name": "ahmadian",
+      "phone_number": "09384483425"
+    },
+    {
+      "first_name": "mostafa",
+      "last_name": "keshmiri",
+      "phone_number": "09384585325"
+    },
+    {
+      "first_name": "reza",
+      "last_name": "amiri",
+      "phone_number": "09394586987"
+    }
+  ]
+}

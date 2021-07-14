@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load phonebook_custom_tags %}
+
+
+{% block title %}
+    {% trans "Search Your Phone Number" %}
+{% endblock %}
+
+{% block content %}
+    <div class="alert text-center" role="alert" style="margin-top: 100px;"></div>
+    <form id="PhoneNumberFrom">
+        <div class="text-center" style="padding-top: 100px">
+            <label for="query" class="text-white fw-bold">{% trans "Enter phone number: " %}</label>
+            <input type="text" id="query" maxlength="11">
+        </div>
+
+        <div class="text-center ps-lg-4 pt-lg-3">
+            <div class="form-check-inline">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" checked>
+                <label class="form-check-label text-white fw-bold" for="flexRadioDefault1">
+                    {% trans "Phone Number" %}
+                </label>
+            </div>
+
+            <div class="form-check-inline">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2">
+                <label class="form-check-label text-white fw-bold" for="flexRadioDefault2">
+                    {% trans "Start With" %}
+                </label>
+            </div>
+
+            <div class="form-check-inline">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3">
+                <label class="form-check-label text-white fw-bold" for="flexRadioDefault3">
+                    {% trans "End With" %}
+                </label>
+            </div>
+
+            <div class="form-check-inline">
+                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault4">
+                <label class="form-check-label text-white fw-bold" for="flexRadioDefault4">
+                    {% trans "Contain" %}
+                </label>
+            </div>
+        </div>
+    </form>
+
+    <div class="text-center pb-lg-3 pt-lg-3 ps-lg-4">
+        <button id="search-btn" class="btn btn-primary btn-sm">{% trans "Search" %}</button>
+    </div>
+
+    <div class="pt-lg-5 text-center">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12" style="padding-right: 200px; padding-left: 200px">
+                    <table id="output-tbl" class="table table-success table-striped table-hover">
+                        <tr>
+                            <td colspan="3">{% trans "Founded Phone Number" %}</td>
+                        </tr>
+                        <tr class="static">
+                            <th>{% trans "First Name" %}</th>
+                            <th>{% trans "Last Name" %}</th>
+                            <th>{% trans "Phone Number" %}</th>
+                        </tr>
+                        {% for row in all_phones %}
+                            <tr class="dynamic">
+                                <td>{{ row.first_name }}</td>
+                                <td>{{ row.last_name }}</td>
+                                <td>
+                                    {% if request.LANGUAGE_CODE == 'fa' %}
+                                        {{ row.phone_number|convert_to_persion_number:'fa' }}
+                                    {% else %}
+                                        {{ row.phone_number|convert_to_persion_number:'en' }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block page_scripts %}
+    <script>
+        $(document).ready(
+            function () {
+                $("#search-btn").click(
+                    function () {
+                        let checked_radio_box_number = 0;
+                        let digit = new RegExp('^[0-9]+$');
+                        let alert_msg = $(".alert");
+                        let query = $("#query");
+                        let query_text = query.val();
+
+                        if (digit.test(query_text)) {
+                            if ($('#flexRadioDefault1').is(':checked')) {
+                                checked_radio_box_number = 1;
+                            } else if ($('#flexRadioDefault2').is(':checked')) {
+                                checked_radio_box_number = 2;
+                            } else if ($('#flexRadioDefault3').is(':checked')) {
+                                checked_radio_box_number = 3;
+                            } else {
+                                checked_radio_box_number = 4;
+                            }
+
+                            $.ajax(
+                                {
+                                    url: "{% url "info:search" %}",
+
+                                    data:
+                                        {
+                                            phone_number: query_text,
+                                            checked_radio_box_number: checked_radio_box_number
+                                        },
+
+                                    method: "GET",
+
+                                    success:
+                                        function (response) {
+
+                                            let result_count = response["results_count"];
+                                            let dynamic_trs = $(".dynamic");
+
+                                            if (result_count) {
+                                                alert_msg.addClass("alert-success");
+                                                alert_msg.removeClass("alert-danger");
+                                            } else {
+                                                alert_msg.addClass("alert-danger");
+                                                alert_msg.removeClass("alert-success");
+                                            }
+
+                                            if (dynamic_trs) {
+                                                dynamic_trs.remove();
+                                                // dynamic_trs.empty();
+                                            }
+
+                                            alert_msg.html("Number (" + query_text + ") of result is: " + result_count);
+
+                                            $(response["results"]).each(
+                                                function (index, obj) {
+                                                    let output_tbl = $("#output-tbl");
+
+                                                    let my_table_data =
+                                                        "<tr class='dynamic'><td>" + obj.first_name + "</td>" +
+                                                        "<td>" + obj.last_name + "</td>" +
+                                                        "<td>" + obj.phone_number + "</td></tr>"
+
+                                                    $(output_tbl).append(my_table_data);
+                                                }
+                                            );
+                                        }
+                                }
+                            );
+                        } else {
+                            alert_msg.addClass("alert-danger");
+                            alert_msg.html("This (" + query_text + ") is invalid number");
+                        }
+                        query.val("");
+                    }
+                );
+            }
+        );
+    </script>
+{% endblock %}

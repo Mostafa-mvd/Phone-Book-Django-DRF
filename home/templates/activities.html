@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Your Activities" %}{% endblock %}
+
+{% block content %}
+    <div style="margin-right: 300px;margin-left: 300px;margin-top: 15%;">
+        <table class="text-center table table table-info table-striped table-hover">
+            <tr>
+                <td colspan="3">{% trans "Your Five Recently Activities" %}</td>
+            </tr>
+            <tr>
+                <th>#</th>
+                <th>{% trans "Action" %}</th>
+                <th>{% trans "Input" %}</th>
+            </tr>
+            {% for activity in activities %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ activity.action_message }}</td>
+                    <td>{{ activity.action_input }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

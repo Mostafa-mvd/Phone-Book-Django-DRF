@@ -1,0 +1,3 @@
+django-debug-toolbar==3.2.1
+pymemcache
+python-memcached-stats

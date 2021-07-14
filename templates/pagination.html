@@ -1,0 +1,59 @@
+{% load i18n %}
+{% load phonebook_custom_tags %}
+
+
+{% block content %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item">
+                <a class="page-link" href="?page=1">
+                    {% trans "First" %}
+                </a>
+            </li>
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item active" aria-current="page">
+                        <a class="page-link" href="?page={{ i }}">
+                            {% if request.LANGUAGE_CODE == 'fa' %}
+                                {{ i|convert_to_persion_number:'fa' }}
+                            {% else %}
+                                {{ i|convert_to_persion_number:'en' }}
+                            {% endif %}
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}">
+                            {% if request.LANGUAGE_CODE == 'fa' %}
+                                {{ i|convert_to_persion_number:'fa' }}
+                            {% else %}
+                                {{ i|convert_to_persion_number:'en' }}
+                            {% endif %}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ paginator.num_pages }}">
+                    {% trans "Last" %}
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

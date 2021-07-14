@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <div class="text-center" style="padding-top: 300px">
+        <p class="fs-5 text-white fw-bold">
+            {% trans "Thanks for checking our site" %} <br> {% trans "if you want login again please click on" %}
+            <a href="{% url "user:login" %}">{% trans "LOGIN" %}</a>
+        </p>
+    </div>
+{% endblock %}

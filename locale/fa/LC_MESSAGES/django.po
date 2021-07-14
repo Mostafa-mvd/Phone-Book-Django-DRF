@@ -1,0 +1,200 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-07-10 16:29+0000\n"
+"PO-Revision-Date: 2021-07-10 21:00+0430\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: fa\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 2.3\n"
+
+#: home/templates/activities.html:4
+msgid "Your Activities"
+msgstr "فعالیت های شما"
+
+#: home/templates/activities.html:10
+msgid "Your Five Recently Activities"
+msgstr "پنج فعالیت اخیر شما"
+
+#: home/templates/activities.html:14
+msgid "Action"
+msgstr "عمل"
+
+#: home/templates/activities.html:15
+msgid "Input"
+msgstr "ورودی"
+
+#: home/templates/home.html:4
+msgid "Your Home"
+msgstr "خونه شما"
+
+#: home/templates/home.html:9
+msgid "Hello"
+msgstr "سلام"
+
+#: home/templates/home.html:10
+msgid "Your Phone Book Project Is Ready To Use."
+msgstr "دفترچه تلفن شما آماده استفاده کردن است"
+
+#: home/templates/home.html:12
+msgid "Please Login."
+msgstr "لطفا وارد اکانت خود شوید."
+
+#: info/models.py:12
+msgid "Auto Increment Id"
+msgstr "افزایش خودکار آی دی"
+
+#: info/models.py:13
+msgid "User"
+msgstr "کاربر"
+
+#: info/models.py:14 info/templates/add_info.html:18
+#: info/templates/download_phone_number_page.html:10
+#: info/templates/search.html:60 info/templates/show_and_edit.html:45
+msgid "First Name"
+msgstr "نام"
+
+#: info/models.py:15 info/templates/add_info.html:26
+#: info/templates/download_phone_number_page.html:11
+#: info/templates/search.html:61 info/templates/show_and_edit.html:46
+msgid "Last Name"
+msgstr "نام خانوادگی"
+
+#: info/models.py:16 info/templates/add_info.html:33
+#: info/templates/download_phone_number_page.html:12
+#: info/templates/search.html:20 info/templates/search.html:62
+#: info/templates/show_and_edit.html:47
+msgid "Phone Number"
+msgstr "شماره تلفن"
+
+#: info/models.py:17
+msgid "Created Time"
+msgstr "تاریخ ساخته شده"
+
+#: info/templates/add_info.html:6
+msgid "Add You Info"
+msgstr "اطلاعاتتو اضافه کن"
+
+#: info/templates/add_info.html:14
+msgid "Add Form"
+msgstr "فرم اضافه کردن"
+
+#: info/templates/add_info.html:44 info/templates/show_and_edit.html:66
+msgid "Submit"
+msgstr "تایید"
+
+#: info/templates/download_phone_number_page.html:7
+#: info/templates/show_and_edit.html:42
+msgid "Added Phone Number"
+msgstr "شماره تلفن های اضافه شده"
+
+#: info/templates/search.html:5
+msgid "Search Your Phone Number"
+msgstr "جستجوی شماره تلفن"
+
+#: info/templates/search.html:12
+msgid "Enter phone number: "
+msgstr "شماره تلفن رو وارد کن:"
+
+#: info/templates/search.html:27
+msgid "Start With"
+msgstr "شروع با"
+
+#: info/templates/search.html:34
+msgid "End With"
+msgstr "اتمام با"
+
+#: info/templates/search.html:41
+msgid "Contain"
+msgstr "حاوی"
+
+#: info/templates/search.html:48 templates/base.html:60
+msgid "Search"
+msgstr "جستجو"
+
+#: info/templates/search.html:57
+msgid "Founded Phone Number"
+msgstr "شماره تلفن های پیدا شده"
+
+#: info/templates/show_and_edit.html:36
+msgid "Download"
+msgstr "دانلود"
+
+#: info/templates/show_and_edit.html:48 info/templates/show_and_edit.html:71
+msgid "Edit"
+msgstr "ویرایش"
+
+#: info/templates/show_and_edit.html:49
+msgid "Delete"
+msgstr "حذف"
+
+#: info/templates/show_and_edit.html:89 templates/pagination.html:8
+msgid "First"
+msgstr "اولین"
+
+#: info/templates/show_and_edit.html:121 templates/pagination.html:40
+msgid "Last"
+msgstr "آخرین"
+
+#: templates/base.html:20
+msgid "Phone Book"
+msgstr "دفترچه تلفن"
+
+#: templates/base.html:35
+msgid "Home"
+msgstr "خانه"
+
+#: templates/base.html:42 users/templates/users/login_form.html:32
+msgid "Login"
+msgstr "ورود"
+
+#: templates/base.html:49
+msgid "Logout"
+msgstr "خروج"
+
+#: templates/base.html:54
+msgid "Activities"
+msgstr "فعالیت ها"
+
+#: templates/base.html:65
+msgid "Add"
+msgstr "اضافه"
+
+#: templates/base.html:70
+msgid "Show"
+msgstr "نمایش"
+
+#: users/templates/users/login_form.html:5
+#: users/templates/users/login_form.html:20
+msgid "Login Form"
+msgstr "فرم ورود"
+
+#: users/templates/users/login_form.html:24
+msgid "Username"
+msgstr "نام کاربری"
+
+#: users/templates/users/login_form.html:28
+msgid "Password"
+msgstr "رمز عبور"
+
+#: users/templates/users/logout.html:7
+msgid "Thanks for checking our site"
+msgstr "ممنون از اینکه سایت مارو چک کردید"
+
+#: users/templates/users/logout.html:7
+msgid "if you want login again please click on"
+msgstr "اگر میخواهید دوباره وارد شود کلید کنید روی"
+
+#: users/templates/users/logout.html:8
+msgid "LOGIN"
+msgstr "ورود به اکانت"

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+
+{% block title %} {% trans "Add You Info" %} {% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="p-lg-4">
+            <p id="message"></p>
+        </div>
+        <div class="col-12">
+            <div style="margin-left: 35%; margin-right: 35%; margin-top: 5%;">
+                <h4 class="text-white fw-bold">{% trans "Add Form" %}</h4>
+                <form>
+                    {% csrf_token %}
+                    <div class="form-group p-lg-4">
+                        <label for="first_name" class="text-white fw-bold">{% trans "First Name" %}</label>
+                        {{ form.first_name|add_class:"my-input form-control"|attr:"onclick:changeInputBorderColor(event)" }}
+                        {% comment %} {% render_field form.first_name class="my-input form-control" onclick="changeInputBorderColor(event)" %} {% endcomment %}
+                        <!-- <input name="first_name" id="first_name" class="my-input form-control" type="text"
+                            onclick="changeInputBorderColor(event)"> -->
+                    </div>
+
+                    <div class="form-group p-lg-4">
+                        <label for="last_name" class="text-white fw-bold">{% trans "Last Name" %}</label>
+                        {{ form.last_name|add_class:"my-input form-control"|attr:"onclick:changeInputBorderColor(event)" }}
+                        {% comment %} {% render_field form.last_name class="my-input form-control" onclick="changeInputBorderColor(event)" %} {% endcomment %}
+                        <!-- <input name="last_name" id="last_name" class="my-input form-control" type="text"
+                            onclick="changeInputBorderColor(event)"> -->
+                    </div>
+
+                    <div class="form-group p-lg-4">
+                        <label for="phone_number" class="text-white fw-bold">{% trans "Phone Number" %}</label>
+                        {{ form.phone_number|add_class:"my-input form-control"|attr:"onclick:changeInputBorderColor(event)"|attr:"maxlength:11" }}
+                        {% comment %} {% render_field form.phone_number class="my-input form-control" maxlength="11" onclick="changeInputBorderColor(event)" %} {% endcomment %}
+                        <!-- <input name="phone_number" id="phone_number" class="my-input form-control" type="text"
+                                maxlength="11"
+                                onclick="changeInputBorderColor(event)"> -->
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button id="submit-button" class="btn-primary text-white">{% trans "Submit" %}</button>
+    </div>
+
+{% endblock %}
+
+{% block page_scripts %}
+    <script>
+
+        function changeInputBorderColor(event) {
+            let input_target = $(event.target);
+            input_target.removeAttr("style");
+            input_target.removeAttr("placeholder");
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        $(document).ready(
+            function () {
+                let submit_button_selector = $("#submit-button");
+                let message_p_tag_selector = $("#message");
+
+
+                submit_button_selector.click(
+                    function () {
+
+                        // let first_name = $("#first_name")[0].value;
+
+                        const csrftoken = getCookie('csrftoken');
+                        let digit = new RegExp('^[0-9]+$');
+                        let first_name_selector = $("#id_first_name");
+                        let last_name_selector = $("#id_last_name");
+                        let phone_number_selector = $("#id_phone_number");
+                        let first_name_value = first_name_selector.val();
+                        let last_name_value = last_name_selector.val();
+                        let phone_number_value = phone_number_selector.val();
+
+                        if (digit.test(phone_number_value)) {
+
+                            // connect to server and get response
+                            $.ajax(
+                                {
+                                    url: "{% url "info:add_info" %}",
+
+                                    headers: {'X-CSRFToken': csrftoken},
+
+                                    method: "POST",
+
+                                    mode: 'same-origin',
+
+                                    data: {
+                                        first_name: first_name_value,
+                                        last_name: last_name_value,
+                                        phone_number: phone_number_value,
+                                    },
+
+                                    success:
+                                        function (response) {
+                                            let messages = response["messages"]
+                                            let result = response["result"]
+
+                                            if (result) {
+                                                // message_p_tag_selector.html(messages);
+                                                alert(messages)
+
+                                                //add new row to the search table that is in search template
+                                                $(response["new_info_row"]).each(
+                                                    function (index, obj) {
+                                                        let output_tbl = $("#output-tbl");
+
+                                                        let my_table_data =
+                                                            "<tr class='dynamic'><td>" + obj.first_name + "</td>" +
+                                                            "<td>" + obj.last_name + "</td>" +
+                                                            "<td>" + obj.phone_number + "</td></tr>"
+
+                                                        $(output_tbl).append(my_table_data);
+                                                    })
+
+                                            } else {
+                                                // show errors in input fields
+                                                let name_attr;
+                                                for (let i = 0; i < messages.length; i++) {
+                                                    for (name_attr in messages[i]) {
+                                                        let input_selector = $("#" + name_attr);
+                                                        let message = messages[i][name_attr];
+
+                                                        input_selector[0].setAttribute("style", "border-color:red");
+                                                        input_selector[0].setAttribute("placeholder", message);
+                                                    }
+                                                }
+                                            }
+
+                                            first_name_selector.val("");
+                                            last_name_selector.val("");
+                                            phone_number_selector.val("");
+                                        }
+                                }
+                            )
+                        } else {
+                            alert("phone number have to be digit.");
+                        }
+
+                    }
+                )
+            }
+        )
+    </script>
+{% endblock %}
