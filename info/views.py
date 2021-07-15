@@ -1,4 +1,6 @@
 import logging
+from django.views.generic.base import View
+import rest_framework
 import weasyprint
 from collections import defaultdict
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -12,7 +14,26 @@ from info.helper_functions import add_to_session
 from . import forms, models
 
 
+from .serializers import AddPhoneNumberSerializer
+from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.generics import CreateAPIView
+from rest_framework.viewsets import ViewSetMixin, ModelViewSet
+from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework import permissions
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from info import serializers
+
+
 logger = logging.getLogger(__name__)
+
+
+class PhoneNumberViewSet(ModelViewSet):
+    queryset = models.PhoneBook.objects.all()
+    serializer_class = serializers.AddPhoneNumberSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+
 
 
 class AddPhoneNumber(LoginRequiredMixin, FormView):
