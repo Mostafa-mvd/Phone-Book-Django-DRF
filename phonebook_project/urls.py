@@ -26,6 +26,10 @@ urlpatterns = [
     path("user/", include("users.urls", namespace="user_login"))
 ]
 
+urlpatterns += [
+    path('user-auth/', include('rest_framework.urls')),
+]
+
 
 if settings.DEBUG:
     urlpatterns += [

@@ -1,38 +1,54 @@
+
+
 import logging
-from django.views.generic.base import View
-import rest_framework
 import weasyprint
 from collections import defaultdict
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
-from django.core.exceptions import NON_FIELD_ERRORS, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView, UpdateView, DeleteView
 from info.helper_functions import add_to_session
-from . import forms, models
 
 
-from .serializers import AddPhoneNumberSerializer
-from rest_framework.viewsets import ModelViewSet, ViewSet
-from rest_framework.mixins import CreateModelMixin
-from rest_framework.generics import CreateAPIView
-from rest_framework.viewsets import ViewSetMixin, ModelViewSet
-from rest_framework.renderers import TemplateHTMLRenderer
-from rest_framework import permissions
-from rest_framework.views import APIView
+from rest_framework import status, viewsets
+from rest_framework import permissions as rest_permissions
+from info import forms, models, serializers
+from info import permissions as info_permissions
 from rest_framework.response import Response
-from info import serializers
 
 
 logger = logging.getLogger(__name__)
 
 
-class PhoneNumberViewSet(ModelViewSet):
+# RestAPI View --------------------------------------------------------------
+
+
+class PhoneNumberViewSet(viewsets.ModelViewSet):
     queryset = models.PhoneBook.objects.all()
-    serializer_class = serializers.AddPhoneNumberSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.PhoneNumberSerializer
+    permission_classes = [rest_permissions.IsAuthenticated, info_permissions.PhoneNumberCreatorOrNot]
+
+    def create(self, request, *args, **kwargs):
+        phone_number = self.request.POST.get("phone_number", None)
+        phone_number_qs = models.PhoneBook.objects.filter(user=request.user.id).filter(phone_number=phone_number)
+
+        if not phone_number_qs:
+            return super().create(request, *args, **kwargs)
+        else:
+            content = {"Error": "Your phone already exists"}
+            return Response(data=content, status=status.HTTP_409_CONFLICT)
+    
+    def filter_queryset(self, queryset):
+        qs = super().filter_queryset(queryset)
+        qs = qs.filter(user=self.request.user)
+        return qs
+
+
+
+# Normal View --------------------------------------------------------------
 
 
 

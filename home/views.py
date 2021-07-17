@@ -1,9 +1,20 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
+from django.utils.translation import activate
+from django.shortcuts import redirect, render
 
 
 class ShowHome(TemplateView):
     template_name = "home.html"
+
+    # def get(self, request, *arg, **kwarg):
+    #     lang = request.GET.get("lang", 'en')
+
+    #     if lang == 'en':
+    #         activate('en')
+    #     elif lang == 'fa':
+    #         activate('fa')
+    #     return render(template_name=self.get_template_names(), request=request)
 
 
 class ShowActivities(LoginRequiredMixin, TemplateView):

@@ -13,7 +13,7 @@ app_name = "info"
 
 router = DefaultRouter()
 
-router.register(prefix=r"", viewset=views.PhoneNumberViewSet, basename="add-form")
+router.register(prefix=r"", viewset=views.PhoneNumberViewSet, basename="phone-book")
 
 
 urlpatterns = [
@@ -24,5 +24,5 @@ urlpatterns = [
     path('download-phone-book/', views.DownloadPhoneBook.as_view(), name='download-phone-book'),
     path('delete/<int:pk>/', require_POST(views.DeletePhoneNumber.as_view()), name='delete_phone_number'),
 
-    path("add-phone/", include(router.urls), name='add_phone'),
+    path("api/phone-book/", include(router.urls), name='phone_book'),
 ]

@@ -202,6 +202,12 @@ CACHES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 
+# LANGUAGES = [
+#     ('fa', ('Persian')),
+#     ('en', ('English')),
+# ]
+
+
 LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale')]
 LANGUAGE_CODE = 'fa' # destination language
 

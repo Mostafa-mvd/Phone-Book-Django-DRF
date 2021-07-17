@@ -2,7 +2,7 @@
 {% load i18n %}
 
 <!DOCTYPE html>
-<html lang="en" {% if request.LANGUAGE_CODE == 'fa' %} dir='rtl' {% endif %}>
+<html {% if request.LANGUAGE_CODE == 'fa' %} lang='fa' dir='rtl' {% else %} lang='en' dir='ltr' {% endif %}>
 <head>
     <title>{% block title %}{% endblock title %}</title>
     <link rel="stylesheet" href={% static "bootstrap_cdn/css/bootstrap.css" %}>
@@ -22,6 +22,10 @@
         <a class="navbar-brand" href="{% url "home:home" %}">
             <i class="fa fa-address-book"></i> {% trans "Phone Book" %}
         </a>
+        {% comment %} <p class='text-white mt-3'>
+            <a class="navbar-brand" href="{{ request.path }}?lang=en"><i class=""></i> {% trans "English" %}</a>
+            <a class="navbar-brand" href="{{ request.path }}?lang=fa"><i class=""></i> {% trans "Persian" %}</a>
+        </p> {% endcomment %}
         {% if request.user.is_authenticated %}
             <a class="navbar-brand" href="{% url "home:home" %}">
                 <i class="fa fa-user"></i> {{ request.user.username }}
