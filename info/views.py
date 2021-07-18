@@ -196,9 +196,26 @@ class SearchPhoneNumber(LoginRequiredMixin, ListView):
 
 
 class EditPhoneNumber(LoginRequiredMixin, UpdateView):
-    success_url = reverse_lazy("info:show_info")
+    queryset = models.PhoneBook.objects.all()
     fields = ("phone_number",)
     qs_dict = defaultdict(dict)
+
+    def post(self, request, *args, **kwargs):
+        # the number is given by user from form's field
+        new_phone_number = request.POST.get("phone_number", None)
+        existing_phone_number_obj = models.PhoneBook.objects.filter(phone_number=new_phone_number)
+
+        # for checking if new phone number is given that does exist or not
+        if existing_phone_number_obj:
+            # the phone number is chosen for updating in otherwise the row of table that has this phone number is our HTML
+            chosen_phone_number = self.get_object()
+            form = self.get_form()
+            form.initial['phone_number'] = chosen_phone_number.phone_number
+            form.add_error("phone_number", "Your phone number already exist.")
+
+            return self.form_invalid(form)
+
+        return super().post(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         pk = self.request.GET.get("pk", None)
@@ -310,4 +327,3 @@ class DeletePhoneNumber(LoginRequiredMixin, DeleteView):
         statics_func.add_to_session(self.request.session, "Deleted", f'{deleted_phone_number_input}')
 
         return delete_respone
-
