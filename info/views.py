@@ -1,23 +1,24 @@
 
 
-import logging
-import weasyprint
-from collections import defaultdict
+from django.utils import decorators
+from info import forms, models, serializers, statics_func
+from info import permissions as info_permissions
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.http import JsonResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import FormView, ListView, UpdateView, DeleteView
-from info.helper_functions import add_to_session
+from django.utils.encoding import smart_str
 
-
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, filters, decorators
 from rest_framework import permissions as rest_permissions
-from info import forms, models, serializers
-from info import permissions as info_permissions
 from rest_framework.response import Response
+
+import csv, json, logging, weasyprint
+from collections import defaultdict
 
 
 logger = logging.getLogger(__name__)
@@ -27,29 +28,67 @@ logger = logging.getLogger(__name__)
 
 
 class PhoneNumberViewSet(viewsets.ModelViewSet):
+    search_fields = ['phone_number', 'first_name', 'last_name', ]
+    filter_backends = (filters.SearchFilter,)
     queryset = models.PhoneBook.objects.all()
     serializer_class = serializers.PhoneNumberSerializer
     permission_classes = [rest_permissions.IsAuthenticated, info_permissions.PhoneNumberCreatorOrNot]
 
     def create(self, request, *args, **kwargs):
-        phone_number = self.request.POST.get("phone_number", None)
-        phone_number_qs = models.PhoneBook.objects.filter(user=request.user.id).filter(phone_number=phone_number)
+        """Create User Object With API"""
 
-        if not phone_number_qs:
+        if statics_func.phone_number_exists_or_not(request):
             return super().create(request, *args, **kwargs)
         else:
-            content = {"Error": "Your phone already exists"}
-            return Response(data=content, status=status.HTTP_409_CONFLICT)
+            error = {"detail": "Your phone already exists"}
+            return Response(data=error, status=status.HTTP_409_CONFLICT)
+    
+    def update(self, request, *args, **kwargs):
+        """Update User Object With API"""
+
+        if statics_func.phone_number_exists_or_not(request):
+            return super().update(request, *args, **kwargs)
+        else:
+            error = {"detail": "Your phone already exists"}
+            return Response(data=error, status=status.HTTP_409_CONFLICT)
+    
+    @decorators.action(detail=False, description="Download", url_path="download")
+    def download_phone_numbers(self, request, *args, **kwargs):
+        resp = self.list(request)
+        phone_numbers_lst = json.loads(json.dumps(resp.data))
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="phone_numbers.csv"'
+
+        csv_writer = csv.writer(response, csv.excel)
+        response.write(u'\ufeff'.encode('utf8'))
+
+        # writing headers
+        csv_writer.writerow([
+            smart_str(u"pk"),
+            smart_str(u"first_name"),
+            smart_str(u"last_name"),
+            smart_str(u"phone_number"),
+            smart_str(u"created_time")
+        ])
+
+        for phone_number in phone_numbers_lst:
+            row = []
+            for val in phone_number.values():
+                row.append(val)
+            csv_writer.writerow(row)
+
+        return response
     
     def filter_queryset(self, queryset):
+        """Get User's Phone Number"""
+
         qs = super().filter_queryset(queryset)
         qs = qs.filter(user=self.request.user)
         return qs
 
 
-
-# Normal View --------------------------------------------------------------
-
+# Normal Views --------------------------------------------------------------
 
 
 class AddPhoneNumber(LoginRequiredMixin, FormView):
@@ -85,7 +124,7 @@ class AddPhoneNumber(LoginRequiredMixin, FormView):
 
         # Add to session
         new_phone_number_input = form.data["phone_number"]
-        add_to_session(self.request.session, "Added", new_phone_number_input)
+        statics_func.add_to_session(self.request.session, "Added", new_phone_number_input)
 
         return JsonResponse(
             {
@@ -104,7 +143,7 @@ class AddPhoneNumber(LoginRequiredMixin, FormView):
                 error_messages.append({field.name: error})
 
         new_phone_number_input = form.data["phone_number"]
-        add_to_session(self.request.session, "Not Added", new_phone_number_input)
+        statics_func.add_to_session(self.request.session, "Not Added", new_phone_number_input)
         logger.info("Add form was invalid.")
 
         return JsonResponse(
@@ -151,7 +190,7 @@ class SearchPhoneNumber(LoginRequiredMixin, ListView):
         else:
             qs = qs.filter(phone_number__contains=phone_number_input)
 
-        add_to_session(self.request.session, "Searched For", phone_number_input)
+        statics_func.add_to_session(self.request.session, "Searched For", phone_number_input)
 
         return qs
 
@@ -195,7 +234,7 @@ class EditPhoneNumber(LoginRequiredMixin, UpdateView):
         # Add to session
         old_phone_number_input = form.initial["phone_number"]
         new_phone_number_input = form.data["phone_number"]
-        add_to_session(self.request.session, "Edited", f'{old_phone_number_input} -> {new_phone_number_input}')
+        statics_func.add_to_session(self.request.session, "Edited", f'{old_phone_number_input} -> {new_phone_number_input}')
 
         return JsonResponse({
             'result': True,
@@ -206,7 +245,7 @@ class EditPhoneNumber(LoginRequiredMixin, UpdateView):
         logger.info("Edit form was invalid.")
         old_phone_number_input = form.initial["phone_number"]
         new_phone_number_input = form.data["phone_number"]
-        add_to_session(self.request.session, "Not Edited", f'{old_phone_number_input} -> {new_phone_number_input}')
+        statics_func.add_to_session(self.request.session, "Not Edited", f'{old_phone_number_input} -> {new_phone_number_input}')
 
         return JsonResponse({
             'result': False,
@@ -268,7 +307,7 @@ class DeletePhoneNumber(LoginRequiredMixin, DeleteView):
 
         # Add to session
         deleted_phone_number_input = self.object.phone_number
-        add_to_session(self.request.session, "Deleted", f'{deleted_phone_number_input}')
+        statics_func.add_to_session(self.request.session, "Deleted", f'{deleted_phone_number_input}')
 
         return delete_respone
 
