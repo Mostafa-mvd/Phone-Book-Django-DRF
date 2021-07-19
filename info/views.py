@@ -1,5 +1,6 @@
 
 
+from django.db.models import query
 from django.utils import decorators
 from info import forms, models, serializers, statics_func
 from info import permissions as info_permissions
@@ -54,13 +55,20 @@ class PhoneNumberViewSet(viewsets.ModelViewSet):
     
     @decorators.action(detail=False, description="Download", url_path="download")
     def download_phone_numbers(self, request, *args, **kwargs):
-        resp = self.list(request)
-        phone_numbers_lst = json.loads(json.dumps(resp.data))
+        phone_number_querydict = self.list(request)
+        phone_numbers_list = json.loads(json.dumps(phone_number_querydict.data))
 
+        # create response with text/csv MIME
         response = HttpResponse(content_type='text/csv')
+
+        # the Content-Disposition is a header indicating if the content is expected to be as an attachment, that is downloaded and saved locally
         response['Content-Disposition'] = 'attachment; filename="phone_numbers.csv"'
 
+        # respose is like open(filename) for writer
+        # csv.excel is the type we want to write in response -> the way we want to behave with response
         csv_writer = csv.writer(response, csv.excel)
+
+        # excel needs this line to open UTF-8 file properly (correctly)
         response.write(u'\ufeff'.encode('utf8'))
 
         # writing headers
@@ -72,12 +80,14 @@ class PhoneNumberViewSet(viewsets.ModelViewSet):
             smart_str(u"created_time")
         ])
 
-        for phone_number in phone_numbers_lst:
+        # writing rows (values)
+        for phone_number in phone_numbers_list:
             row = []
             for val in phone_number.values():
                 row.append(val)
             csv_writer.writerow(row)
 
+        # return created csv file in response for downloading
         return response
     
     def filter_queryset(self, queryset):
