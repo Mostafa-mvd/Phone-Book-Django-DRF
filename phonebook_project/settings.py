@@ -235,3 +235,9 @@ STATICFILES_DIRS = (str(BASE_DIR.joinpath('static')),)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_EXPIRE_SECONDS = 60 * 10  # 600seconds = 10 minutes
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination', 
+    'PAGE_SIZE': 4
+}

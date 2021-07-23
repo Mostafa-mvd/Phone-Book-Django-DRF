@@ -80,12 +80,13 @@
                         </button>
                     </td>
                     <td>
-                        <form method='post' action="{% url 'info:delete_phone_number' row.pk %}">
+                        <form>
                             {% csrf_token %}
-                            <button class='btn btn-primary mt-lg-4' type='submit'>
-                               <i class='fa fa-trash'></i> {% trans "Delete" %}
-                            </button>
                         </form>
+                        <button id='delete-btn' class='btn btn-primary mt-lg-4 text-white' onclick='deletePhoneNumber(event)'
+                            data-href="{% url 'info:delete_phone_number' row.pk %}" data-id="{{ row.pk }}">
+                            <i class='fa fa-trash'></i> {% trans "Delete" %}
+                        </button>
                     </td>
                 </tr>
             {% endfor %}
@@ -105,7 +106,7 @@
                     </li>
                 {% endif %}
 
-                {% for i in paginator.page_range %}
+                {% for i in num_pages %}
                     {% if page_obj.number == i %}
                         <li class="page-item active" aria-current="page">
                             <a class="page-link" href="?page={{ i }}">
@@ -181,6 +182,30 @@
             trs[chosen_row_id] = tr;
         }
 
+        function deletePhoneNumber(event) {
+            href_row = event.currentTarget.dataset["href"];
+            chosen_row_id = event.currentTarget.dataset["id"];
+            tr = $("#" + chosen_row_id);
+            csrf_token = getCookie('csrftoken');
+
+            $.ajax(
+                {
+                    url: href_row,
+
+                    headers: {'X-CSRFToken': csrf_token},
+
+                    method: 'delete',
+
+                    dataType: 'json',
+
+                    success: function(response) {
+                        alert(response['message']);
+                        $(tr).remove();
+                    }
+                }
+            )
+        }
+
         function submitButtonFunction(event) {
             let input_elm, submit_btn, chosen_row_id, tr;
             let csrf_token, p_elm, new_phone_number;
@@ -199,7 +224,7 @@
 
                     headers: {'X-CSRFToken': csrf_token},
 
-                    method: "POST",
+                    method: "PATCH",
 
                     data: {
                         phone_number: new_phone_number
@@ -207,11 +232,11 @@
 
                     success: function (response) {
                         p_elm.html(new_phone_number);
-                        alert(response["messages"]);
+                        alert(response.responseJSON['message']);
                     },
 
                     error: function (response) {
-                        alert(response.responseJSON.messages.phone_number[0]);
+                        alert(response.responseJSON['message']);
                     }
                 }
             )

@@ -1,13 +1,12 @@
 
 
-from django.db.models import query
+from django.urls.base import reverse
 from django.utils import decorators
 from info import forms, models, serializers, statics_func
 from info import permissions as info_permissions
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
-from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.http import JsonResponse, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
@@ -17,7 +16,10 @@ from django.utils.encoding import smart_str
 from rest_framework import status, viewsets, filters, decorators
 from rest_framework import permissions as rest_permissions
 from rest_framework.response import Response
-
+from rest_framework import generics
+from rest_framework.renderers import TemplateHTMLRenderer
+from rest_framework.exceptions import ValidationError
+from rest_framework import pagination
 import csv, json, logging, weasyprint
 from collections import defaultdict
 
@@ -25,10 +27,154 @@ from collections import defaultdict
 logger = logging.getLogger(__name__)
 
 
-# RestAPI View --------------------------------------------------------------
+# RestAPI Views with templates --------------------------------------------------------------
+
+
+class ListPhoneNumbers(LoginRequiredMixin, generics.ListAPIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    queryset = models.PhoneBook.objects.all()
+    serializer_class = serializers.PhoneNumberSerializer
+    pagination_class = pagination.PageNumberPagination
+    template_name = "show_and_edit.html"
+
+    def get(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+
+        return Response(
+        {
+            "object_list":  self.get_paginated_list(qs),
+            "page_obj": self.get_page_obj(),
+            "paginator": self.get_paginator(),
+            "num_pages": self.get_page_range()
+        })
+
+    def filter_queryset(self, queryset):
+        qs = super().filter_queryset(queryset)
+        qs = qs.filter(user=self.request.user)
+        return qs
+
+    def get_paginated_list(self, queryset):
+        return self.paginate_queryset(queryset)
+
+    def get_page_obj(self):
+        return self.paginator.page
+    
+    def get_paginator(self):
+        return self.paginator.page.paginator
+    
+    def get_page_range(self):
+        return range(1, self.paginator.page.paginator.num_pages+1)
+
+
+class CreatePhoneNumbers(LoginRequiredMixin, generics.ListCreateAPIView):
+    renderer_classes = [TemplateHTMLRenderer]
+    queryset = models.PhoneBook.objects.all()
+    serializer_class = serializers.PhoneNumberSerializer
+
+    def get(self, request, *args, **kwargs):
+        return Response(
+            {
+                'serializer': self.get_serializer()
+            },
+            template_name = "add_info.html"
+        )
+    
+    def create(self, request, *args, **kwargs):
+        if statics_func.phone_number_exists_or_not(request):
+            try:
+                resp = super().create(request, *args, **kwargs)
+            except ValidationError:
+                return JsonResponse(
+                    {
+                        "detail": "fields required",
+                        "result": False
+                    }, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            return JsonResponse(
+                {
+                    "messages": "Your information successfully saved",
+                    "new_info_row": resp.data,
+                    "result": True
+                },
+                status=status.HTTP_200_OK
+            )
+        else:
+            return JsonResponse(
+                {
+                    "detail": "Your phone already exists",
+                    "result": False
+                }, 
+                status=status.HTTP_409_CONFLICT)
+
+
+class UpdatePhoneNumbers(LoginRequiredMixin, generics.UpdateAPIView):
+    queryset = models.PhoneBook.objects.all()
+    serializer_class = serializers.PhoneNumberSerializer
+
+    def get_object(self, queryset=None):
+        pk = self.request.GET.get("pk", None)
+        if pk:
+            if pk.isdigit():
+                user = self.request.user
+                phone_obj = get_object_or_404(klass=models.PhoneBook, pk=pk)
+
+                if user == phone_obj.user:
+                    return phone_obj
+                else:
+                    raise Http404
+            else:
+                raise Http404
+        else:
+            raise Http404
+
+    def update(self, request, *args, **kwargs):
+        if statics_func.phone_number_exists_or_not(request):
+            try:
+                super().update(request, *args, **kwargs)
+            except ValidationError:
+                return JsonResponse(
+                    {
+                        "message": "fields required or they are not valid",
+                        "result": False
+                    }, status=status.HTTP_400_BAD_REQUEST
+                )
+
+            return JsonResponse(
+                {
+                    'message': "You've successfully edited",
+                    'result': True
+                }, status=status.HTTP_200_OK)
+        else:
+            return JsonResponse(
+                {
+                    'message': "phone number already exists",
+                    'result': False
+                }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
+class DeletePhoneNumbers(LoginRequiredMixin, generics.DestroyAPIView):
+    queryset = models.PhoneBook.objects.all()
+    serializer_class = serializers.PhoneNumberSerializer
+
+    def delete(self, request, *args, **kwargs):
+        super().delete(request, *args, **kwargs)
+
+        return JsonResponse(
+                {
+                    'message': "You've successfully deleted"
+                }, status=status.HTTP_200_OK)
+
+
+class SearchPhoneNumbers(LoginRequiredMixin, generics.ListAPIView):
+    pass
+
+
+# RestAPI Views with ModelViewSet --------------------------------------------------------------
 
 
 class PhoneNumberViewSet(viewsets.ModelViewSet):
+
     search_fields = ['phone_number', 'first_name', 'last_name', ]
     filter_backends = (filters.SearchFilter,)
     queryset = models.PhoneBook.objects.all()

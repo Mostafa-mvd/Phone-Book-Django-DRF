@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load widget_tweaks %}
-
+{% load  rest_framework %}
 
 {% block title %} {% trans "Add You Info" %} {% endblock %}
 
@@ -15,37 +15,13 @@
                 <h4 class="text-white fw-bold">{% trans "Add Form" %}</h4>
                 <form>
                     {% csrf_token %}
-                    <div class="form-group p-lg-4">
-                        <label for="first_name" class="text-white fw-bold">{% trans "First Name" %}</label>
-                        {{ form.first_name|add_class:"my-input form-control"|attr:"onclick:changeInputBorderColor(event)" }}
-                        {% comment %} {% render_field form.first_name class="my-input form-control" onclick="changeInputBorderColor(event)" %} {% endcomment %}
-                        <!-- <input name="first_name" id="first_name" class="my-input form-control" type="text"
-                            onclick="changeInputBorderColor(event)"> -->
-                    </div>
-
-                    <div class="form-group p-lg-4">
-                        <label for="last_name" class="text-white fw-bold">{% trans "Last Name" %}</label>
-                        {{ form.last_name|add_class:"my-input form-control"|attr:"onclick:changeInputBorderColor(event)" }}
-                        {% comment %} {% render_field form.last_name class="my-input form-control" onclick="changeInputBorderColor(event)" %} {% endcomment %}
-                        <!-- <input name="last_name" id="last_name" class="my-input form-control" type="text"
-                            onclick="changeInputBorderColor(event)"> -->
-                    </div>
-
-                    <div class="form-group p-lg-4">
-                        <label for="phone_number" class="text-white fw-bold">{% trans "Phone Number" %}</label>
-                        {{ form.phone_number|add_class:"my-input form-control"|attr:"onclick:changeInputBorderColor(event)"|attr:"maxlength:11" }}
-                        {% comment %} {% render_field form.phone_number class="my-input form-control" maxlength="11" onclick="changeInputBorderColor(event)" %} {% endcomment %}
-                        <!-- <input name="phone_number" id="phone_number" class="my-input form-control" type="text"
-                                maxlength="11"
-                                onclick="changeInputBorderColor(event)"> -->
-                    </div>
+                    {% render_form serializer %}
                 </form>
+                <div class="text-center">
+                    <button id="submit-button" class="btn-primary text-white">{% trans "Submit" %}</button>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="text-center">
-        <button id="submit-button" class="btn-primary text-white">{% trans "Submit" %}</button>
     </div>
 
 {% endblock %}
@@ -87,9 +63,9 @@
 
                         const csrftoken = getCookie('csrftoken');
                         let digit = new RegExp('^[0-9]+$');
-                        let first_name_selector = $("#id_first_name");
-                        let last_name_selector = $("#id_last_name");
-                        let phone_number_selector = $("#id_phone_number");
+                        let first_name_selector = $("[name=first_name]");
+                        let last_name_selector = $("[name=last_name]");
+                        let phone_number_selector = $("[name=phone_number]");
                         let first_name_value = first_name_selector.val();
                         let last_name_value = last_name_selector.val();
                         let phone_number_value = phone_number_selector.val();
@@ -99,7 +75,7 @@
                             // connect to server and get response
                             $.ajax(
                                 {
-                                    url: "{% url "info:add_info" %}",
+                                    url: "{% url "info:add" %}",
 
                                     headers: {'X-CSRFToken': csrftoken},
 
@@ -135,7 +111,9 @@
                                                         $(output_tbl).append(my_table_data);
                                                     })
 
-                                            } else {
+                                            } 
+                                            
+                                            else {
                                                 // show errors in input fields
                                                 let name_attr;
                                                 for (let i = 0; i < messages.length; i++) {
@@ -152,7 +130,12 @@
                                             first_name_selector.val("");
                                             last_name_selector.val("");
                                             phone_number_selector.val("");
-                                        }
+                                    },
+
+                                    error:
+                                        function (errors) {
+                                            alert(errors.responseJSON['detail']);
+                                    }
                                 }
                             )
                         } else {
