@@ -63,7 +63,7 @@
                             <th>{% trans "Last Name" %}</th>
                             <th>{% trans "Phone Number" %}</th>
                         </tr>
-                        {% for row in all_phones %}
+                        {% for row in object_list %}
                             <tr class="dynamic">
                                 <td>{{ row.first_name }}</td>
                                 <td>{{ row.last_name }}</td>
