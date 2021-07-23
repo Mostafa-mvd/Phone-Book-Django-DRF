@@ -216,6 +216,52 @@ class SearchPhoneNumbers(LoginRequiredMixin, generics.ListAPIView):
         return qs
 
 
+class DownloadPhoneNumberRest(LoginRequiredMixin, generics.ListAPIView):
+    queryset = models.PhoneBook.objects.all()
+    serializer_class = info_serializers.PhoneNumberSerializer
+
+    def filter_queryset(self, queryset):
+        qs = super().filter_queryset(queryset)
+        qs = qs.filter(user=self.request.user)
+        return qs
+
+    def get(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        phone_numbers = django_serializers.serialize('json', qs)
+        phone_numbers_list = json.loads(phone_numbers)
+
+        # create response with text/csv MIME
+        response = HttpResponse(content_type='text/csv')
+
+        # the Content-Disposition is a header indicating if the content is expected to be as an attachment, that is downloaded and saved locally
+        response['Content-Disposition'] = 'attachment; filename="phone_numbers.csv"'
+
+        # respose is like open(filename) for writer
+        # csv.excel is the type we want to write in response -> the way we want to behave with response
+        csv_writer = csv.writer(response, csv.excel)
+
+        # excel needs this line to open UTF-8 file properly (correctly)
+        response.write(u'\ufeff'.encode('utf8'))
+
+        # writing headers
+        csv_writer.writerow([
+            smart_str(u"first_name"),
+            smart_str(u"last_name"),
+            smart_str(u"phone_number")
+        ])
+
+        # writing rows
+        for phone_number in phone_numbers_list:
+            row = []
+            row.append(phone_number['fields']['first_name'])
+            row.append(phone_number['fields']['last_name'])
+            row.append(phone_number['fields']['phone_number'])
+            csv_writer.writerow(row)
+
+        # return created csv file in response for downloading
+        return response
+
+
 # RestAPI Views with ModelViewSet --------------------------------------------------------------
 
 
@@ -250,20 +296,14 @@ class PhoneNumberViewSet(viewsets.ModelViewSet):
         phone_number_querydict = self.list(request)
         phone_numbers_list = json.loads(json.dumps(phone_number_querydict.data))
 
-        # create response with text/csv MIME
         response = HttpResponse(content_type='text/csv')
 
-        # the Content-Disposition is a header indicating if the content is expected to be as an attachment, that is downloaded and saved locally
         response['Content-Disposition'] = 'attachment; filename="phone_numbers.csv"'
 
-        # respose is like open(filename) for writer
-        # csv.excel is the type we want to write in response -> the way we want to behave with response
         csv_writer = csv.writer(response, csv.excel)
 
-        # excel needs this line to open UTF-8 file properly (correctly)
         response.write(u'\ufeff'.encode('utf8'))
 
-        # writing headers
         csv_writer.writerow([
             smart_str(u"pk"),
             smart_str(u"first_name"),
@@ -272,14 +312,12 @@ class PhoneNumberViewSet(viewsets.ModelViewSet):
             smart_str(u"created_time")
         ])
 
-        # writing rows (values)
         for phone_number in phone_numbers_list:
             row = []
             for val in phone_number.values():
                 row.append(val)
             csv_writer.writerow(row)
 
-        # return created csv file in response for downloading
         return response
     
     def filter_queryset(self, queryset):

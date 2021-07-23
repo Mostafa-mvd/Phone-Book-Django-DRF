@@ -13,11 +13,12 @@ urlpatterns = [
     # path("update/", require_POST(views.EditPhoneNumber.as_view()), name="update"),
     # path('delete/<int:pk>/', require_POST(views.DeletePhoneNumber.as_view()), name='delete_phone_number'),
     # path("search/", views.SearchPhoneNumber.as_view(), name="search"),
-    path('download-phone-book/', views.DownloadPhoneBook.as_view(), name='download-phone-book'),
+    # path('download-phone-book/', views.DownloadPhoneBook.as_view(), name='download-phone-book'),
 
     path('phone-book/add/', views.CreatePhoneNumbers.as_view(), name='add'),
     path('phone-book/list/', views.ListPhoneNumbers.as_view(), name='list'),
     path('phone-book/update/', views.UpdatePhoneNumbers.as_view(), name='update'),
-    path('delete/<int:pk>/', views.DeletePhoneNumbers.as_view(), name='delete_phone_number'),
-    path("search/", views.SearchPhoneNumbers.as_view(), name="search")
+    path('phone-book/delete/<int:pk>/', views.DeletePhoneNumbers.as_view(), name='delete'),
+    path("phone-book/search/", views.SearchPhoneNumbers.as_view(), name="search"),
+    path('phone-book/download/', views.DownloadPhoneNumberRest.as_view(), name='download')
 ]

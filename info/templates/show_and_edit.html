@@ -34,7 +34,7 @@
 
 {% block content %}
     <div class='text-center fs-5' style="margin-top: 100px;">
-        <a type='button' href="{% url 'info:download-phone-book' %}" style='text-decoration: none; color:white;' class='btn btn-primary'>
+        <a type='button' href="{% url 'info:download' %}" style='text-decoration: none; color:white;' class='btn btn-primary'>
             {% trans "Download" %}  <i class="fa fa-download"></i>
         </a>
     </div>
@@ -84,7 +84,7 @@
                             {% csrf_token %}
                         </form>
                         <button id='delete-btn' class='btn btn-primary mt-lg-4 text-white' onclick='deletePhoneNumber(event)'
-                            data-href="{% url 'info:delete_phone_number' row.pk %}" data-id="{{ row.pk }}">
+                            data-href="{% url 'info:delete' row.pk %}" data-id="{{ row.pk }}">
                             <i class='fa fa-trash'></i> {% trans "Delete" %}
                         </button>
                     </td>
